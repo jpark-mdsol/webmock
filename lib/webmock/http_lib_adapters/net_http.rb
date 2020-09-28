@@ -72,16 +72,21 @@ module WebMock
         end
 
         def request(request, body = nil, &block)
+          STDOUT.puts "> webmock-2.3.2:: #net_http.rb: #request <"
           request_signature = WebMock::NetHTTPUtility.request_signature_from_request(self, request, body)
 
+          STDOUT.puts "> #net_http.rb: #request_signature: #{request_signature} <"
           WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
           if webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
+            STDOUT.puts "> #net_http.rb: request#webmock_response  <"
             @socket = Net::HTTP.socket_type.new
             WebMock::CallbackRegistry.invoke_callbacks(
               {lib: :net_http}, request_signature, webmock_response)
             build_net_http_response(webmock_response, &block)
           elsif WebMock.net_connect_allowed?(request_signature.uri)
+            STDOUT.puts "> #net_http.rb: #WebMock.net_connect_allowed?(request_signature.uri): #{WebMock.net_connect_allowed?(request_signature.uri)} <"
+
             check_right_http_connection
             after_request = lambda do |response|
               if WebMock::CallbackRegistry.any_callbacks?
@@ -106,11 +111,18 @@ module WebMock
                 }
               end
             else
-              start_with_connect {
-                super_with_after_request.call
-              }
+              STDOUT.puts "> #net_http.rb: #started?: #{started?} <"
+              # begin
+                start_with_connect {
+                  super_with_after_request.call
+                }
+              # rescue => e
+              #   binding.pry
+              # end
+              STDOUT.puts "> #net_http.rb: after start_with_connect <"
             end
           else
+            STDOUT.puts "> #net_http.rb: #WebMock::NetConnectNotAllowedError <"
             raise WebMock::NetConnectNotAllowedError.new(request_signature)
           end
         end
@@ -144,6 +156,7 @@ module WebMock
         alias_method :start_with_connect, :start
 
         def start(&block)
+          STDOUT.puts "> #net_http.rb: #start <"
           if WebMock::Config.instance.net_http_connect_on_start
             super(&block)
           else

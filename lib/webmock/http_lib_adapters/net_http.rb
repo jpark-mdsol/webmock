@@ -2,7 +2,7 @@ require 'net/http'
 require 'net/https'
 require 'stringio'
 require File.join(File.dirname(__FILE__), 'net_http_response')
-
+STDOUT.puts "> webmock:: #net_http.rb init<"
 
 module WebMock
   module HttpLibAdapters
@@ -72,20 +72,20 @@ module WebMock
         end
 
         def request(request, body = nil, &block)
-          STDOUT.puts "> webmock-2.3.2:: #net_http.rb: #request <"
+          # STDOUT.puts "> webmock-2.3.2:: #net_http.rb: #request <"
           request_signature = WebMock::NetHTTPUtility.request_signature_from_request(self, request, body)
 
-          STDOUT.puts "> #net_http.rb: #request_signature: #{request_signature} <"
+          # STDOUT.puts "> #net_http.rb: #request_signature: #{request_signature} <"
           WebMock::RequestRegistry.instance.requested_signatures.put(request_signature)
 
           if webmock_response = WebMock::StubRegistry.instance.response_for_request(request_signature)
-            STDOUT.puts "> #net_http.rb: request#webmock_response  <"
+            # STDOUT.puts "> #net_http.rb: request#webmock_response  <"
             @socket = Net::HTTP.socket_type.new
             WebMock::CallbackRegistry.invoke_callbacks(
               {lib: :net_http}, request_signature, webmock_response)
             build_net_http_response(webmock_response, &block)
           elsif WebMock.net_connect_allowed?(request_signature.uri)
-            STDOUT.puts "> #net_http.rb: #WebMock.net_connect_allowed?(request_signature.uri): #{WebMock.net_connect_allowed?(request_signature.uri)} <"
+            # STDOUT.puts "> #net_http.rb: #WebMock.net_connect_allowed?(request_signature.uri): #{WebMock.net_connect_allowed?(request_signature.uri)} <"
 
             check_right_http_connection
             after_request = lambda do |response|
@@ -111,7 +111,7 @@ module WebMock
                 }
               end
             else
-              STDOUT.puts "> #net_http.rb: #started?: #{started?} <"
+              # STDOUT.puts "> #net_http.rb: #started?: #{started?} <"
               # begin
                 start_with_connect {
                   super_with_after_request.call
@@ -119,10 +119,10 @@ module WebMock
               # rescue => e
               #   binding.pry
               # end
-              STDOUT.puts "> #net_http.rb: after start_with_connect <"
+              # STDOUT.puts "> #net_http.rb: after start_with_connect <"
             end
           else
-            STDOUT.puts "> #net_http.rb: #WebMock::NetConnectNotAllowedError <"
+            # STDOUT.puts "> #net_http.rb: #WebMock::NetConnectNotAllowedError <"
             raise WebMock::NetConnectNotAllowedError.new(request_signature)
           end
         end

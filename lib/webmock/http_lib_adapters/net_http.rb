@@ -2,7 +2,7 @@ require 'net/http'
 require 'net/https'
 require 'stringio'
 require File.join(File.dirname(__FILE__), 'net_http_response')
-STDOUT.puts "> webmock:: #net_http.rb init<"
+STDOUT.puts "> webmock[logging]:: #net_http.rb:5 init<"
 
 module WebMock
   module HttpLibAdapters
@@ -156,7 +156,7 @@ module WebMock
         alias_method :start_with_connect, :start
 
         def start(&block)
-          STDOUT.puts "> #net_http.rb: #start <"
+          STDOUT.puts "> webmock[logging]#net_http.rb:159 #start <"
           if WebMock::Config.instance.net_http_connect_on_start
             super(&block)
           else
